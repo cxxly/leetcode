@@ -31,36 +31,60 @@ tag:
 
 **java**
 
+从左到右遍历字符串：
+1. 跳过空白字符
+2. 正负号判断
+>如果出现'+'或不出现，为正
+如果出现'-'为负
+3. 溢出判断
+>32位整数最值2147483647，-2147483648， 如果转换过程中出现21474836x, x>4且下一位为数字或x<=4且下一位>=8则溢出，根据符号返回max value 或 min value
+
+
 ```java
-	public int myAtoi(String str) {
-		if (str == null || str.isEmpty())
-			return 0;
-		
-		str = str.trim();
-		
-		int index = 0;
-		int sign = 1;
-		long result = 0;
-		if (str.charAt(index) == '-') {
-			sign = -1;
-			index++;
-		} else if (str.charAt(index) == '+') {
-			index++;
-		}
-		for (; index < str.length(); index++) {
-			if (!Character.isDigit(str.charAt(index)))
-				break;
-			result = result * 10 + (str.charAt(index) - '0');
-			if (result > Integer.MAX_VALUE)
-				break;
-		}
-		
-		result = sign * result;
-		if (result >= Integer.MAX_VALUE)
-			return Integer.MAX_VALUE;
-		if (result <= Integer.MIN_VALUE)
-			return Integer.MIN_VALUE;
-		
-		return (int) result;
+    private static final int MAXDIV10 = Integer.MAX_VALUE/10;
+    public int myAtoi(String str) {
+        int i=0, n = str.length();
+        while(i<n && str.charAt(i)==' ') i++;
+        int sign = 1;
+        if(i<n && str.charAt(i)=='+')  i++;
+        else if(i<n && str.charAt(i)=='-') {sign=-1; i++;}
+        int num = 0;
+        while(i<n && Character.isDigit(str.charAt(i))) {
+            int digit = str.charAt(i)-'0';
+            if(num>MAXDIV10 || num==MAXDIV10 && digit>=8) return sign==1? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            num = num*10+digit;
+            i++;
+        }
+        return sign * num;
+    }
+```
+
+**go**
+```go
+func atoi(s string) int {
+	i, n := 0, len(s)
+	for i < n && s[i] == ' ' {
+		i++
 	}
+	sign := 1
+	if i < n && s[i] == '+' {
+		i++
+	} else if i < n && s[i] == '-' {
+		sign = -1
+		i++
+	}
+	num := 0
+	for i < n && s[i] >= '0' && s[i] <= '9' {
+		digit := s[i] - '0'
+		if num > MAXINT32DIV10 || num == MAXINT32DIV10 && digit >= 8 {
+			if sign == 1 {
+				return math.MaxInt32
+			}
+			return math.MinInt32
+		}
+		num = num*10 + digit
+		i++
+	}
+	return sign * num
+}
 ```
